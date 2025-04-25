@@ -76,7 +76,7 @@ class FitnessZone(ABC):
 
     # Переопределение магического метода __str__()
     def __str__(self):
-        return f"ID зоны: {self._zone_id}, Тип зоны: {self._type}, Вместимость зоны: {self._capacity}, Статус зоны: {self._status}"
+        return f"ID зоны: {self.zone_id}, Тип зоны: {self.type}, Вместимость зоны: {self.capacity}, Статус зоны: {self.status}"
         
     # Переопределение магического метода __new__()
     def __new__(cls, zone_id, *args, **kwargs):
@@ -108,10 +108,10 @@ class GymZone(FitnessZone, Cleanable):
 
     # Переопределение абстрактного метода подготовки зоны
     def prepare_zone(self):
-        self._status = ZoneStatus.CLEANING
+        self.status = ZoneStatus.CLEANING
     # Реализация метода clean_zone интерфейса Cleanable
     def clean_zone(self):
-        self._status = ZoneStatus.OPEN
+        self.status = ZoneStatus.OPEN
     
 class YogaZona(FitnessZone):
     def __init__(self, zone_id, capacity, status, zone_square, carpet_type):
@@ -136,10 +136,10 @@ class YogaZona(FitnessZone):
 
     # Переопределение абстрактного метода подготовки зоны
     def prepare_zone(self):
-        self._status = ZoneStatus.CLEANING
+        self.status = ZoneStatus.CLEANING
     # Реализация метода clean_zone интерфейса Cleanable
     def clean_zone(self):
-        self._status = ZoneStatus.OPEN
+        self.status = ZoneStatus.OPEN
     
 class PoolZone(FitnessZone):
     def __init__(self, zone_id, capacity, status, pool_len, pool_depth):
@@ -164,10 +164,10 @@ class PoolZone(FitnessZone):
 
     # Переопределение абстрактного метода подготовки зоны
     def prepare_zone(self):
-        self._status = ZoneStatus.CLEANING
+        self.status = ZoneStatus.CLEANING
     # Реализация метода clean_zone интерфейса Cleanable
     def clean_zone(self):
-        self._status = ZoneStatus.OPEN
+        self.status = ZoneStatus.OPEN
 
 class Trainer():
     def __init__(self, full_name, specialization, experience):
@@ -202,7 +202,7 @@ class Trainer():
         if fitness_zone.status == ZoneStatus.CLEANING:
             raise ZoneUnavailableException(f"Зона {fitness_zone.zone_id} находится на уборке.")
         
-        return f"Тренер {self.__full_name} вышел на смену в зоне {fitness_zone.zone_id}"
+        return f"Тренер {self.full_name} вышел на смену в зоне {fitness_zone.zone_id}"
 
 class FitnessCenter():
     def __init__(self, zones=None, trainers=None):
@@ -226,17 +226,17 @@ class FitnessCenter():
 
     # Методы
     def add_zone(self, zone: FitnessZone):
-        if zone.zone_id in [z.zone_id for z in self.__zones]:
+        if zone.zone_id in [z.zone_id for z in self.zones]:
             raise ValueError(f"Зона с идентификатором {zone.zone_id} уже существует в фитнес-центре.")
-        self.__zones.append(zone)
+        self.zones.append(zone)
 
     def remove_zone(self, zone: FitnessZone):
-        if zone.zone_id not in [z.zone_id for z in self.__zones]:
+        if zone.zone_id not in [z.zone_id for z in self.zones]:
             raise ValueError(f"Зона с идентификатором {zone.zone_id} не найдена в фитнес-центре.")    
-        self.__zones.remove(zone)
+        self.zones.remove(zone)
         
     def get_available_zones(self):
-        return [zone for zone in self.__zones if zone.status == ZoneStatus.OPEN]
+        return [zone for zone in self.zones if zone.status == ZoneStatus.OPEN]
 
 class TrainingSession():
     __existing_session_ids = set()
@@ -269,7 +269,7 @@ class TrainingSession():
 
     # Методы:
     def get_session_info(self):
-        return f"Номер тренировки: {self.__session_id}, дата и время: {self.__date_time}, количество участников: {self.__members_count}" 
+        return f"Номер тренировки: {self.session_id}, дата и время: {self.date_time}, количество участников: {self.members_count}" 
 
     # Переопределение магического метода __new()
     def new(cls, session_id, *args, **kwargs):
@@ -300,25 +300,25 @@ class FitnessNetwork():
 
     # Методы:
     def add_center(self, center: FitnessCenter):
-        self.__centers.append(center)
+        self.centers.append(center)
 
     def remove_center(self, center: FitnessCenter):
-        self.__centers.remove(center)
+        self.centers.remove(center)
     
     def assign_session_to_zone(self, session: TrainingSession, zone: FitnessZone):
         if zone.status == ZoneStatus.CLEANING:
             raise ZoneUnavailableException(f"Зона {zone.zone_id} находится на уборке.")
 
-        self.__zone_sessions[zone.zone_id] = session
+        self.zone_sessions[zone.zone_id] = session
         return (f"Тренировка {session.session_id} назначена зоне {zone.zone_id}")
         
     def get_session_for_zone(self, zone: FitnessZone):
-        return self.__zone_sessions.get(zone.zone_id, None)
+        return self.zone_sessions.get(zone.zone_id, None)
 
     def assign_trainer(self, trainer: Trainer, zone: FitnessZone):
         # Проверяем, что зона существует хотя бы в одном из центров
         zone_exists = False
-        for center in self.__centers:
+        for center in self.centers:
             if zone in center.zones:
                 zone_exists = True
                 break
@@ -352,6 +352,7 @@ class FitnessPolicies:
                 "10. Соблюдайте правила техники безопасности при работе с тренажерами."
             ]
         return rules
+    
 def main():
     # Создание зон
     try:
@@ -433,11 +434,11 @@ def main():
         print(rule)
 
     # Демонстрация подготовки и уборки зоны
-    print(f"\nСтатус зоны {gym_zone1.zone_id}: {gym_zone1.status}")
+    print(f"\nСтатус зоны {gym_zone1.zone_id}: {gym_zone1.status.value}")
     gym_zone1.prepare_zone()
-    print(f"Статус зоны {gym_zone1.zone_id} после подготовки: {gym_zone1.status}")
+    print(f"Статус зоны {gym_zone1.zone_id} после подготовки: {gym_zone1.status.value}")
     gym_zone1.clean_zone()
-    print(f"Статус зоны {gym_zone1.zone_id} после уборки: {gym_zone1.status}")
+    print(f"Статус зоны {gym_zone1.zone_id} после уборки: {gym_zone1.status.value}")
 
 if __name__ == "__main__":
     main()
